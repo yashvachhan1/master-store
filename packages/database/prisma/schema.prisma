@@ -12,18 +12,23 @@ datasource db {
 // ==========================================
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String       @id @default(uuid())
+  email     String       @unique
   name      String?
   password  String
-  role      Role      @default(CUSTOMER)
+  
+  // Dashboard access roles
+  role      Role         @default(CUSTOMER)
+  
+  // Custom shopping roles (B2B, Retail, Wholesale, XYZ)
+  tier      CustomerTier @default(RETAIL)
   
   orders    Order[]
   reviews   Review[]
   wishlist  Wishlist?
   
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 }
 
 enum Role {
@@ -31,6 +36,15 @@ enum Role {
   ADMIN
   MANAGER
   CUSTOMER
+}
+
+enum CustomerTier {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+  VIP
+  XYZ      // Example custom role
+  ABC      // Example custom role
 }
 
 // ==========================================
@@ -53,9 +67,17 @@ model Product {
   name            String
   slug            String      @unique
   description     String      @db.Text
-  price           Decimal     @db.Decimal(10, 2)
+  
+  // Standard Pricing
+  price           Decimal     @db.Decimal(10, 2) // Base retail price
   compareAtPrice  Decimal?    @db.Decimal(10, 2) // Original price, for "On Sale" display
   costPrice       Decimal?    @db.Decimal(10, 2) // For admin profit calculations
+  
+  // Role-based custom pricing
+  wholesalePrice  Decimal?    @db.Decimal(10, 2)
+  distributorPrice Decimal?   @db.Decimal(10, 2)
+  vipPrice        Decimal?    @db.Decimal(10, 2)
+  
   stock           Int         @default(0)
   images          String[]    // Array of image URLs
   
