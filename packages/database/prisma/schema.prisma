@@ -27,7 +27,9 @@ model User {
 }
 
 enum Role {
+  SUPERADMIN
   ADMIN
+  MANAGER
   CUSTOMER
 }
 
@@ -47,23 +49,72 @@ model Category {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String
-  slug        String      @unique
-  description String      @db.Text
-  price       Decimal     @db.Decimal(10, 2)
-  stock       Int         @default(0)
-  images      String[]    // Array of image URLs
+  id              String      @id @default(uuid())
+  name            String
+  slug            String      @unique
+  description     String      @db.Text
+  price           Decimal     @db.Decimal(10, 2)
+  compareAtPrice  Decimal?    @db.Decimal(10, 2) // Original price, for "On Sale" display
+  costPrice       Decimal?    @db.Decimal(10, 2) // For admin profit calculations
+  stock           Int         @default(0)
+  images          String[]    // Array of image URLs
   
-  categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId      String
+  category        Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   
-  orderItems  OrderItem[]
-  reviews     Review[]
-  wishlisted  WishlistItem[]
+  variants        ProductVariant[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  wishlisted      WishlistItem[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model ProductVariant {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  sku         String    @unique
+  name        String    // e.g., "Size: M, Color: Red"
+  price       Decimal?  @db.Decimal(10, 2) // Override product price if needed
+  stock       Int       @default(0)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ==========================================
+// Marketing & Discounts
+// ==========================================
+
+model Coupon {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  description   String?
+  discountType  DiscountType @default(PERCENTAGE)
+  discountValue Decimal      @db.Decimal(10, 2)
+  
+  minOrderValue Decimal?     @db.Decimal(10, 2)
+  maxDiscount   Decimal?     @db.Decimal(10, 2)
+  
+  usageLimit    Int?         // Total times the coupon can be used
+  usedCount     Int          @default(0)
+  
+  startDate     DateTime     @default(now())
+  endDate       DateTime?
+  
+  orders        Order[]
+
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
 }
 
 // ==========================================
@@ -93,29 +144,39 @@ model WishlistItem {
 // ==========================================
 
 model Order {
-  id            String      @id @default(uuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id])
-  status        OrderStatus @default(PENDING)
-  totalAmount   Decimal     @db.Decimal(10, 2)
-  shippingAddr  String      @db.Text
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  status          OrderStatus @default(PENDING)
   
-  orderItems    OrderItem[]
+  subTotal        Decimal     @db.Decimal(10, 2)
+  discountAmount  Decimal     @default(0) @db.Decimal(10, 2)
+  shippingFee     Decimal     @default(0) @db.Decimal(10, 2)
+  totalAmount     Decimal     @db.Decimal(10, 2) // Final amount paid
   
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  
+  shippingAddr    String      @db.Text
+  
+  orderItems      OrderItem[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   
-  productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
   
-  quantity  Int
-  price     Decimal  @db.Decimal(10, 2) // Price at the time of order
+  variantId   String?  // Reference if a specific variant was ordered
+  
+  quantity    Int
+  price       Decimal  @db.Decimal(10, 2) // Price at the time of order
 }
 
 enum OrderStatus {
