@@ -8,20 +8,141 @@ datasource db {
 }
 
 // ==========================================
-// E-commerce Master Models
+// User & Authentication Models
 // ==========================================
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String    @id @default(uuid())
+  email     String    @unique
   name      String?
   password  String
-  role      Role     @default(CUSTOMER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role      @default(CUSTOMER)
+  
+  orders    Order[]
+  reviews   Review[]
+  wishlist  Wishlist?
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 enum Role {
   ADMIN
   CUSTOMER
+}
+
+// ==========================================
+// Product Catalog Models
+// ==========================================
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  slug        String      @unique
+  description String      @db.Text
+  price       Decimal     @db.Decimal(10, 2)
+  stock       Int         @default(0)
+  images      String[]    // Array of image URLs
+  
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  orderItems  OrderItem[]
+  reviews     Review[]
+  wishlisted  WishlistItem[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ==========================================
+// Shopping / Wishlist Models
+// ==========================================
+
+model Wishlist {
+  id        String         @id @default(uuid())
+  userId    String         @unique
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     WishlistItem[]
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+}
+
+// ==========================================
+// Order & Payment Models
+// ==========================================
+
+model Order {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  status        OrderStatus @default(PENDING)
+  totalAmount   Decimal     @db.Decimal(10, 2)
+  shippingAddr  String      @db.Text
+  
+  orderItems    OrderItem[]
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2) // Price at the time of order
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// ==========================================
+// Review System
+// ==========================================
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @default(5)
+  comment   String?  @db.Text
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, productId]) // One review per user per product
 }
