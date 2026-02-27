@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState, use } from 'react';
@@ -141,8 +143,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
                                         className={`py-3 text-sm font-bold rounded-lg transition-all border ${selectedSize === size
-                                                ? 'border-neutral-900 bg-neutral-900 text-white'
-                                                : 'border-neutral-200 bg-white text-neutral-900 hover:border-neutral-400'
+                                            ? 'border-neutral-900 bg-neutral-900 text-white'
+                                            : 'border-neutral-200 bg-white text-neutral-900 hover:border-neutral-400'
                                             }`}
                                     >
                                         {size}
