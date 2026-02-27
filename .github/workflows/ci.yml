@@ -28,7 +28,7 @@ jobs:
         run: npm run lint
 
       - name: Type Check
-        run: npx turbo typecheck
+        run: npm run check-types
 
       - name: Build Projects
         run: npm run build
