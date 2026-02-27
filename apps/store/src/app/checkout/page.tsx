@@ -220,10 +220,10 @@ export default function CheckoutPage() {
 
                         {/* Call to Action Mobile (Visible only on mobile below summary) */}
                         <div className="block lg:hidden mt-8">
-                            <button className="w-full bg-black text-white hover:bg-neutral-800 transition-colors h-14 rounded-full font-bold text-base flex items-center justify-center group shadow-xl shadow-black/10">
+                            <Link href="/checkout/success" className="w-full bg-black text-white hover:bg-neutral-800 transition-colors h-14 rounded-full font-bold text-base flex items-center justify-center group shadow-xl shadow-black/10">
                                 <Lock className="w-4 h-4 mr-2 text-neutral-300 group-hover:text-white transition-colors" />
                                 Complete Order
-                            </button>
+                            </Link>
                         </div>
 
                     </div>
@@ -289,10 +289,10 @@ export default function CheckoutPage() {
 
                             {/* Call to Action Desktop */}
                             <div className="hidden lg:block">
-                                <button className="w-full bg-black text-white hover:bg-neutral-800 transition-colors h-14 rounded-full font-bold text-base flex items-center justify-center group shadow-xl shadow-black/10">
+                                <Link href="/checkout/success" className="w-full bg-black text-white hover:bg-neutral-800 transition-colors h-14 rounded-full font-bold text-base flex items-center justify-center group shadow-xl shadow-black/10">
                                     <Lock className="w-4 h-4 mr-2 text-neutral-300 group-hover:text-white transition-colors" />
                                     Complete Order
-                                </button>
+                                </Link>
                                 <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-neutral-500 font-medium">
                                     <ShieldCheck className="w-4 h-4 text-green-600" />
                                     Secure & Encrypted Checkout
