@@ -187,12 +187,12 @@ export default function CartPage(): ReactElement {
                                 <span className="text-3xl font-black">${total.toFixed(2)}</span>
                             </div>
 
-                            <button className="w-full py-4 bg-white text-neutral-900 font-bold rounded-xl hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 relative group overflow-hidden">
+                            <Link href="/checkout" className="w-full py-4 bg-white text-neutral-900 font-bold rounded-xl hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 relative group overflow-hidden">
                                 <span className="relative z-10 flex items-center gap-2">
                                     <Lock className="w-4 h-4" /> Secure Checkout
                                 </span>
                                 <div className="absolute inset-0 bg-neutral-100 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
-                            </button>
+                            </Link>
 
                             {/* Payment Icons Mock */}
                             <div className="mt-6 flex items-center justify-center gap-2 opacity-60">
